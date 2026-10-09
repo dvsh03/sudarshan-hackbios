@@ -119,9 +119,8 @@ def ingest_scraper_data(req: ScraperDataIngestRequest, db: Session = Depends(get
         if db:
             for act_id in actor_ids:
                 handle_lbl = handle if handles else "Unknown Actor"
-                # Check if exists
-                if not db.query(Actor).filter(Actor.id == act_id).first():
-                    db.add(Actor(id=act_id, display_handle=handle_lbl, category="UNKNOWN", risk_level="HIGH", origin_badge="SCRAPER"))
+                # Use merge to avoid IntegrityErrors for duplicates in the same session
+                db.merge(Actor(id=act_id, display_handle=handle_lbl, category="UNKNOWN", risk_level="HIGH", origin_badge="SCRAPER"))
 
         # 2. Add Wallets
         for w_type in ["bitcoin_wallets", "ethereum_wallets", "monero_wallets"]:
@@ -140,7 +139,7 @@ def ingest_scraper_data(req: ScraperDataIngestRequest, db: Session = Depends(get
                 # DB Integration
                 if db:
                     wtype = "WALLET_" + w_type.split("_")[0].upper()
-                    db.add(Entity(actor_id=primary_actor, type=wtype, value=wallet))
+                    db.merge(Entity(actor_id=primary_actor, type=wtype, value=wallet))
 
         # 3. Add PGP Keys
         for pgp in identifiers.get("pgp_keys", []):
@@ -157,7 +156,7 @@ def ingest_scraper_data(req: ScraperDataIngestRequest, db: Session = Depends(get
             
             # DB Integration
             if db:
-                db.add(Entity(actor_id=primary_actor, type="PGP_KEY", value=pgp_short))
+                db.merge(Entity(actor_id=primary_actor, type="PGP_KEY", value=pgp_short))
 
         # 4. Add Emails as IPs (for visual variety in mock)
         for email in identifiers.get("emails", []):
@@ -188,7 +187,7 @@ def ingest_scraper_data(req: ScraperDataIngestRequest, db: Session = Depends(get
             
             # DB Integration
             if db:
-                db.add(InfraFinding(
+                db.merge(InfraFinding(
                     onion_address=source[:50],
                     finding_type="SERVER_BANNER_LEAK",
                     banner=server,
