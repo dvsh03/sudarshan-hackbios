@@ -103,7 +103,7 @@ def extract_links(base_url: str, raw_html: str, same_host_only: bool) -> list:
     return found
 
 
-def fetch_url(url: str, max_retries: int = 3) -> tuple[str, str, dict] | tuple[None, None, None]:
+def fetch_url(url: str, max_retries: int = 3) -> tuple[str, str, dict, str] | tuple[None, None, None, None]:
     print(f"[*] Connecting to {url} via Tor...")
     for attempt in range(1, max_retries + 1):
         try:
@@ -133,7 +133,7 @@ def fetch_url(url: str, max_retries: int = 3) -> tuple[str, str, dict] | tuple[N
             time.sleep(attempt * 3)
 
     print(f"[-] Max retries ({max_retries}) reached for {url}. Skipping.")
-    return None, None, None
+    return None, None, None, None
 
 
 def run_url_mode(
