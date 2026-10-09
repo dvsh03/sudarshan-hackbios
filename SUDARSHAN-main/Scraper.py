@@ -31,6 +31,7 @@ PATTERNS = {
     "ethereum_wallets": re.compile(r"\b0x[a-fA-F0-9]{40}\b"),
     "monero_wallets": re.compile(r"\b[48][0-9ABa-zA-Z]{94}\b"),
     "emails": re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
+    "phone_numbers": re.compile(r"\b(?:\+?\d{1,3}[-.●\s]?)?\(?\d{3}\)?[-.●\s]?\d{3}[-.●\s]?\d{4}\b"),
     "pgp_keys": re.compile(
         r"-----BEGIN PGP PUBLIC KEY BLOCK-----[\s\S]*?-----END PGP PUBLIC KEY BLOCK-----"
     ),

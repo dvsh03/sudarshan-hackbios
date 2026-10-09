@@ -170,6 +170,25 @@ def ingest_scraper_data(req: ScraperDataIngestRequest, db: Session = Depends(get
                 })
             MOCK_GRAPH_DB["edges"].append({"source": primary_actor, "target": email, "label": "USES_EMAIL"})
             
+            # DB Integration
+            if db:
+                db.merge(Entity(actor_id=primary_actor, type="EMAIL", value=email))
+
+        # 4.5 Add Phone Numbers
+        for phone in identifiers.get("phone_numbers", []):
+            if not any(n["id"] == phone for n in MOCK_GRAPH_DB["nodes"]):
+                MOCK_GRAPH_DB["nodes"].append({
+                    "id": phone,
+                    "label": phone,
+                    "sublabel": "Phone Number",
+                    "type": "ip",
+                    "risk": "medium"
+                })
+            MOCK_GRAPH_DB["edges"].append({"source": primary_actor, "target": phone, "label": "USES_PHONE"})
+            
+            if db:
+                db.merge(Entity(actor_id=primary_actor, type="PHONE_NUMBER", value=phone))
+            
         # 5. Infrastructure Headers
         headers = record.get("infrastructure", {}).get("server_headers", {})
         server = headers.get("Server")
