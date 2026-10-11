@@ -11,6 +11,13 @@ MOCK_GRAPH_DB = {
     "edges": []
 }
 
+@router.delete("/clear")
+def clear_graph_data():
+    global MOCK_GRAPH_DB
+    MOCK_GRAPH_DB["nodes"].clear()
+    MOCK_GRAPH_DB["edges"].clear()
+    return {"success": True, "message": "Memory cleared"}
+
 @router.get("/data")
 def get_graph_data(db: Session = Depends(get_db)):
     nodes = []

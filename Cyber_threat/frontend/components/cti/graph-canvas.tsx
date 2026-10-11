@@ -106,12 +106,12 @@ export function GraphCanvas({ selectedId, onSelect, searchQuery = "" }: GraphCan
   useEffect(() => {
     if (fgRef.current) {
       const fg = fgRef.current
-      // Adjusted forces for neater arrangement and less clutter
-      fg.d3Force("charge")?.strength(-1200)?.distanceMax(1200)
-      fg.d3Force("link")?.distance(200)
+      // Adjusted forces to keep unconnected components from flying too far apart
+      fg.d3Force("charge")?.strength(-400)?.distanceMax(800)
+      fg.d3Force("link")?.distance(100)
       fg.d3Force("collide", null) // reset
-      fg.d3Force("collide", window.d3 ? window.d3.forceCollide(30) : null) // Adds some collision padding if d3 is available, else handled by charge
-      fg.d3Force("center")?.strength(0.3)
+      fg.d3Force("collide", window.d3 ? window.d3.forceCollide(30) : null)
+      fg.d3Force("center")?.strength(0.8) // increased gravity to pull everything toward center
       fg.d3ReheatSimulation()
     }
   }, [graphData])

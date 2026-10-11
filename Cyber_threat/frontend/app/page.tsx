@@ -42,7 +42,7 @@ export default function OverviewPage() {
         const res = await fetch("http://127.0.0.1:8000/api/v1/actors")
         if (res.ok) {
           const json = await res.json()
-          if (json.data) setActors(json.data.slice(0, 5))
+          if (json.data) setActors(json.data.slice(0, 10))
         }
       } catch (e) {
         // Fallback

@@ -33,8 +33,49 @@ def background_scan_task(url: str):
     # If the user enters an indicator (e.g. a Wallet or PGP) instead of a URL
     if not url.startswith("http") and not url.endswith(".html"):
         print(f"[*] Indicator Pivot Search triggered for: {url}")
-        # In a real system, we would query the Graph DB for this indicator here.
-        # For the demo, we just simulate a successful search to refresh the graph.
+        # For the demo, dynamically create a Threat Actor based on the search term!
+        db = SessionLocal()
+        actor_id = url.lower().replace(" ", "_")
+        if not db.query(Actor).filter(Actor.id == actor_id).first():
+            new_actor = Actor(
+                id=actor_id,
+                display_handle=f"@{url}",
+                category="UNKNOWN",
+                risk_level="HIGH",
+                origin_badge="PIVOT_DISCOVERY",
+                confidence_score=0.75
+            )
+            db.add(new_actor)
+            
+            # Give them a random wallet to link
+            new_wallet = Entity(
+                actor_id=actor_id,
+                type="WALLET_BTC",
+                value=f"bc1q_{actor_id}_" + str(hash(url))[-8:]
+            )
+            db.add(new_wallet)
+            db.commit()
+            
+            # Also add to MOCK_GRAPH_DB to render in graph immediately
+            global MOCK_GRAPH_DB
+            MOCK_GRAPH_DB["nodes"].append({
+                "id": actor_id,
+                "label": f"@{url}",
+                "sublabel": "Discovered Actor",
+                "type": "actor",
+                "risk": "high"
+            })
+            wallet_id = new_wallet.value
+            MOCK_GRAPH_DB["nodes"].append({
+                "id": wallet_id,
+                "label": wallet_id[:12] + "...",
+                "sublabel": "Unknown Balance",
+                "type": "wallet",
+                "risk": "medium"
+            })
+            MOCK_GRAPH_DB["edges"].append({"source": actor_id, "target": wallet_id, "label": "OWNS_WALLET"})
+            print(f"[+] Added mock Pivot Actor: {url}")
+        db.close()
         return
         
     records = run_integrated_scan(url)
